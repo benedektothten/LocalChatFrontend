@@ -3,7 +3,7 @@
 interface UserState {
     userId: number | null;
     isLoggedIn: boolean;
-    avatarUrl: string;
+    avatarUrl: string | null;
     ownedChatRooms: number[];
     selectUser: (selectedUserId: number) => void;
     logoutUser: () => void;

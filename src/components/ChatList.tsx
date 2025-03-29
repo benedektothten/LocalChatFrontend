@@ -9,7 +9,7 @@ import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useChatRoomStore } from "../stores/chatRoomStore"; // Import Zustand store
-import {userStore, useUserStore} from "../stores/userStore.ts"; // Import Zustand shallow equality checker
+import { useUserStore} from "../stores/userStore.ts"; // Import Zustand shallow equality checker
 import { signalRService } from "../services/signalRChatService.ts";
 
 interface ChatListProps {

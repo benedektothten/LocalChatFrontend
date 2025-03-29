@@ -39,7 +39,7 @@ export default function ButtonAppBar({ title, showMenu, toogleMenu }: ButtonAppB
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                         {title}
                     </Typography>
-                    <Login color="inherit">Login</Login>
+                    <Login />
                 </Toolbar>
             </AppBar>
         </Box>

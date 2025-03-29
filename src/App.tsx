@@ -3,7 +3,7 @@ import Grid from '@mui/material/Grid2';
 import ButtonAppBar from './components/AppBar';
 import ChatList from './components/ChatList';
 import ChatContent from './components/ChatContent';
-import {userStore, useUserStore} from './stores/userStore';
+import { useUserStore } from './stores/userStore';
 import './App.css'
 import {useChatRoomStore} from "./stores/chatRoomStore.ts";
 import ChatRoomAdder from "./components/ChatRoomAdder";

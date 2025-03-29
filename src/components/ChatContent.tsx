@@ -91,7 +91,7 @@ function ChatContent() {
                 chatRoomId: selectedChatRoomId,
                 senderId: userId,
                 content: contentToSend,
-                isGif: !!gifId, // Mark it as a GIF if selected
+                isGif: gifId ? true: false, // Mark it as a GIF if selected
             });
 
             // Clear the input field
@@ -119,9 +119,9 @@ function ChatContent() {
                     }
 
                     // Listen for incoming messages
-                    signalRService.onReceiveMessage(( messageId, chatRoomId, senderId, userName, messageContent, isGif) => {
+                    signalRService.onReceiveMessage(( chatRoomId, messageId,userId, userName, messageContent, isGif) => {
                         if(messageContent){
-                            addSlimMessageToChatRoom(chatRoomId, messageId, senderId, userName, messageContent, isGif);
+                            addSlimMessageToChatRoom(chatRoomId, messageId, userId, userName, messageContent, isGif);
                         }
                     });
 
@@ -198,8 +198,8 @@ function ChatContent() {
                                 p: 1,
                                 borderRadius: 2,
                                 maxWidth: "75%",
-                                backgroundColor: message.sender === "Me" ? "#e0f7fa" : "#fff",
-                                alignSelf: message.sender === "Me" ? "flex-end" : "flex-start",
+                                backgroundColor: message.senderUsername === "Me" ? "#e0f7fa" : "#fff",
+                                alignSelf: message.senderUsername === "Me" ? "flex-end" : "flex-start",
                                 position: "relative",
                                 ":hover .reply-button": {
                                     opacity: 1, // Show reply button on hover
@@ -299,7 +299,7 @@ function ChatContent() {
                     variant="contained"
                     color="primary"
                     endIcon={<SendIcon />}
-                    onClick={handleSend}
+                    onClick={() => handleSend()}
                     disabled={!newMessage.trim()} // Disable button if input is empty
                 >
                     Send
