@@ -22,6 +22,12 @@ jobs:
         with:
           submodules: true
           lfs: false
+      - name: Set Environment Variables
+        run: |
+          echo "VITE_BACKEND_URL=${{ secrets.VITE_BACKEND_URL }}" >> $GITHUB_ENV
+          echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "VITE_REACT_APP_GIPHY_API_KEY=${{ secrets.VITE_REACT_APP_GIPHY_API_KEY }}" >> $GITHUB_ENV
+
       - name: Install OIDC Client from Core Package
         run: npm install @actions/core@1.6.0 @actions/http-client
       - name: Get Id Token
