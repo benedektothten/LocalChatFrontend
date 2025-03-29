@@ -6,6 +6,11 @@ import Button from '@mui/material/Button';
 import AvatarMenu from "./AvatarMenu.tsx";
 import RegistrationModal from "./modals/RegistrationModal.tsx";
 
+type RegisterData = {
+    userName: string;
+    displayName: string;
+    password: string;
+};
 
 export default function Login() {
     const { selectUser, selectAvatarUrl, isLoggedIn, logoutUser} = useUserStore();
@@ -58,7 +63,7 @@ export default function Login() {
                                       userName,
                                       displayName,
                                       password,
-                                  }) => {
+                                  } : RegisterData) => {
         try {
             const token = localStorage.getItem("authToken");
 

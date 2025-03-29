@@ -2,12 +2,12 @@
 
 // Define interfaces for type safety
 export interface ChatRoom {
-    chatRoomId: number;
+    chatRoomId: string;
     name: string;
     isPrivate: boolean;
     createdAt: string;
     latestMessage?: {
-        messageId: number;
+        messageId: string;
         content: string;
         sentAt: string;
         senderId: number;
@@ -22,9 +22,10 @@ export interface CreateChatRoomRequest {
 }
 
 export interface SendMessageRequest {
-    chatRoomId: number;
+    chatRoomId: string;
     senderId: number;
     content: string;
+    isGif: boolean;
 }
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -62,7 +63,7 @@ export const chatRoomService = {
 
 
     // Fetch messages for a specific chat room
-    async getChatRoomMessages(chatRoomId: number, senderId: number) {
+    async getChatRoomMessages(chatRoomId: string, senderId: number) {
         const token = getAuthToken();
         const response = await axios.get(
             `${API_BASE_URL}/chatrooms/${chatRoomId}/messages`,

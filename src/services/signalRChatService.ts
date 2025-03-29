@@ -1,16 +1,16 @@
 ﻿import * as signalR from "@microsoft/signalr";
 
 class SignalRService {
-    private connection: signalR.HubConnection | null = null;
+    public connection: signalR.HubConnection | null = null;
     private readonly backendUrl = import.meta.env.VITE_BACKEND_URL;
     private readonly hubUrl = `${this.backendUrl}/hubs/chat`;
 
     // Initialize the SignalR connection
     public async connect(): Promise<void> {
         this.connection = new signalR.HubConnectionBuilder()
-            .withUrl("http://localhost:5000/hubs/chat",{
+            .withUrl(this.hubUrl,{
                 withCredentials: true,
-                accessTokenFactory: () => localStorage.getItem("authToken")
+                accessTokenFactory: () => localStorage.getItem("authToken") || ""
             }) // Backend hub endpoint
             .withAutomaticReconnect() // Optional: Reconnect automatically on disconnection
             .build();
@@ -58,7 +58,7 @@ class SignalRService {
     }
 
     // Subscribe to receiving messages
-    public onReceiveMessage(handler: (chatRoomId: string, userId: number, userName: string, message: string) => void): void {
+    public onReceiveMessage(handler: (chatRoomId: string, messageId: string, userId: number, userName: string, message: string, isGif: boolean) => void): void {
         if (this.connection) {
             this.connection.off("ReceiveMessage");
             this.connection.on("ReceiveMessage", handler);

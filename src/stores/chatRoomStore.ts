@@ -2,8 +2,8 @@
 import { chatRoomService, ChatRoom } from "../services/chatRoomService";
 
 interface Message {
-    messageId: number;
-    chatRoomId: number;
+    messageId: string;
+    chatRoomId: string;
     senderId: number;
     content: string;
     sentAt: string;
@@ -20,15 +20,15 @@ interface ChatRoomState {
     chatRooms: ChatRoom[]; // List of chat rooms
     messages: Message[]; // Messages in the currently selected chat room
     userAvatars: UserAvatars[];
-    selectedChatRoomId: number | null; // ID of the currently selected chat room
+    selectedChatRoomId: string | null; // ID of the currently selected chat room
     chatListLoading: boolean; // General loading state
     chatRoomMessagesLoading: boolean;
     error: string | null; // Error message state
 
     fetchChatRooms: (userId: number) => Promise<void>; // Fetch chat rooms method
-    fetchChatRoomMessages: (chatRoomId: number, userId: number) => Promise<void>; // Fetch messages method
-    addSlimMessageToChatRoom: (chatRoomId: string, messageId: number, userId: number, messageContent: string) => void;
-    selectChatRoom: (chatRoomId: number) => void; // Set selected chat room
+    fetchChatRoomMessages: (chatRoomId: string, userId: number) => Promise<void>; // Fetch messages method
+    addSlimMessageToChatRoom: (chatRoomId: string, messageId: string, userId: number, userName: string, messageContent: string, isGif: boolean) => void;
+    selectChatRoom: (chatRoomId: string) => void; // Set selected chat room
 }
 
 // Zustand store
@@ -66,12 +66,21 @@ export const useChatRoomStore = create<ChatRoomState>((set) => ({
     },
 
     // Set the selected chat room
-    selectChatRoom: (chatRoomId) => {
+    selectChatRoom: (chatRoomId: string) => {
         set({ selectedChatRoomId: chatRoomId });
     },
-    addSlimMessageToChatRoom: (chatRoomId: string, messageId: number, userId: number, userName: string, messageContent: string, isGif: boolean) => {
-        if(messageContent){
-            const newMessage = { chatRoomId, messageId: messageId, senderId: userId, content: messageContent, senderUsername: userName, isGif: isGif };
+    addSlimMessageToChatRoom: (chatRoomId: string, messageId: string, userId: number, userName: string, messageContent: string, isGif: boolean) => {
+        if (messageContent) {
+            const newMessage = {
+                chatRoomId,
+                messageId,
+                senderId: userId,
+                content: messageContent,
+                sentAt: new Date().toISOString(), // Example - Assign current timestamp
+                senderUsername: userName,
+                isGif,
+            };
+
             // Update the matching chat room's latestMessage
             set((state) => {
                 const updatedChatRooms = state.chatRooms.map((chatRoom) => {
@@ -79,30 +88,29 @@ export const useChatRoomStore = create<ChatRoomState>((set) => ({
                         return {
                             ...chatRoom,
                             latestMessage: {
-                                senderUsername: userName,
-                                content: messageContent,
+                                messageId: newMessage.messageId,
+                                content: newMessage.content,
+                                sentAt: newMessage.sentAt,
+                                senderId: newMessage.senderId,
+                                senderUsername: newMessage.senderUsername,
+                                isGif: newMessage.isGif,
                             },
                         };
                     }
                     return chatRoom; // Keep other chat rooms unchanged
                 });
+
                 // Avoid adding the same message if duplicates exist
                 const isDuplicate = state.messages.some(
                     (m) =>
-                        m.chatRoomId === newMessage.chatRoomId &&
                         m.senderId === newMessage.senderId &&
                         m.content === newMessage.content
-                ); // bugs here. cannot add new message with the same content
+                );
 
-                if (!isDuplicate) {
-                    return {
-                        messages: [...state.messages, newMessage],
-                        chatRooms: updatedChatRooms, // Update chatRooms with modified latestMessage
-                    };
-                }
-
-                return { chatRooms: updatedChatRooms };
-                // Leave the state unchanged
+                return {
+                    chatRooms: updatedChatRooms,
+                    messages: isDuplicate ? state.messages : [...state.messages, newMessage],
+                };
             });
         }
     }
