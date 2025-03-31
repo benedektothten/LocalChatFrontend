@@ -7,8 +7,7 @@ import {
     IconButton,
     TextField,
     Button,
-    CircularProgress,
-    Dialog
+    CircularProgress
 } from "@mui/material";
 import ReplyIcon from "@mui/icons-material/Reply";
 import SendIcon from "@mui/icons-material/Send";
@@ -55,6 +54,7 @@ function ChatContent() {
     const [gifDialogOpen, setGifDialogOpen] = useState(false); // State for GIF selector dialog
     const [gf] = useState(new GiphyFetch(giphyApiKey));
     const [selectedGif, setSelectedGif] = useState(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
 
     const debouncedFetchChatRoomMessages = debounce((chatRoomId, userId) => {
         fetchChatRoomMessages(chatRoomId, userId);
@@ -72,12 +72,25 @@ function ChatContent() {
     // Reference to messages list for auto-scrolling
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Automatically scroll to the bottom when messages change
     useEffect(() => {
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+        // Scroll immediately when changing chat rooms
+        if (selectedChatRoomId && messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: "auto" });
+        }
+    }, [selectedChatRoomId]);
+
+    useEffect(() => {
+        // Smooth scroll when new messages arrive in the current chat
+        if (messages.length > 0 && messagesEndRef.current) {
+            // Small timeout to ensure DOM is updated
+            const timeoutId = setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            }, 100);
+
+            return () => clearTimeout(timeoutId);
         }
     }, [messages]);
+
 
     // Handle sending new message
     const handleSend = async (gifId?: string) => {
@@ -166,29 +179,33 @@ function ChatContent() {
         <Box
             sx={{
                 display: "flex",
-                flexDirection: "column", // Ensures vertical alignment
-                height: "100vh", // Full viewport height
-                width: "100%",
+                flexDirection: "column",
+                height: "100vh", /* Use the full viewport height */
                 backgroundColor: "#f4f4f4",
             }}
         >
             {/* Messages List */}
             <Box
+                ref={messagesContainerRef}
                 sx={{
-                    flexGrow: 1,
-                    overflowY: "auto",
-                    p: 2,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "flex-end", // Messages start from the bottom
+                    flex: 1, /* Take up remaining space */
+                    overflowY: 'auto', /* Enable vertical scrolling */
+                    display: 'flex',
+                    flexDirection: 'column',
+                    padding: 2,
+                    height: '100%',
+                    maxHeight: 'calc(100vh - 120px)'
                 }}
             >
+                {/* Spacer to allow scrolling */}
+                <Box sx={{ flexGrow: 0, minHeight: '5px' }} />
+
                 {messages.map((message) => {
                         const avatarEntry = userAvatars.find((avatar) => avatar.userId === message.senderId);
                         const avatarUrl = avatarEntry?.avatarUrl;
 
                         return (
-                        <Paper
+                        <Box
                             key={message.messageId}
                             elevation={2}
                             sx={{
@@ -205,6 +222,7 @@ function ChatContent() {
                                     opacity: 1, // Show reply button on hover
                                 },
                             }}
+
                         >
                             {/* Avatar */}
                             <Avatar
@@ -250,12 +268,12 @@ function ChatContent() {
                             >
                                 <ReplyIcon fontSize="small" />
                             </IconButton>
-                        </Paper>
+                        </Box>
                     )
                 }
 
                 )}
-                <div ref={messagesEndRef}></div>
+                <div id="messagesEndRef" ref={messagesEndRef}></div>
             </Box>
 
             {/* Input to send new messages */}
@@ -266,9 +284,9 @@ function ChatContent() {
                     p: 2,
                     borderTop: "1px solid #ddd",
                     backgroundColor: "#fff",
-                    position: "sticky", // Stick the input box to the bottom
-                    bottom: 0, // Position fixed to bottom
-                    zIndex: 1, // Ensure it's above other content
+                    /* Remove the height calculation */
+                    /* No need for position: sticky since we're using flexbox layout */
+                    zIndex: 1,
                 }}
             >
                 <TextField
